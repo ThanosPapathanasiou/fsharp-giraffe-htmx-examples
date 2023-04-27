@@ -1,4 +1,4 @@
-module fsharp_giraffe_htmx_examples.App
+module App
 
 open System
 open System.IO
@@ -11,58 +11,18 @@ open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
 // ---------------------------------
-// Models
+// Routing
 // ---------------------------------
 
-type Message =
-    {
-        Text : string
-    }
+open Pages.Index
+open Pages.SearchBoxExample
 
-// ---------------------------------
-// Views
-// ---------------------------------
-
-module Views =
-    open Giraffe.ViewEngine
-
-    let layout (content: XmlNode list) =
-        html [] [
-            head [] [
-                title []  [ encodedText "fsharp_giraffe_htmx_examples" ]
-                link [ _rel  "stylesheet"
-                       _type "text/css"
-                       _href "/main.css" ]
-            ]
-            body [] content
-        ]
-
-    let partial () =
-        h1 [] [ encodedText "fsharp_giraffe_htmx_examples" ]
-
-    let index (model : Message) =
-        [
-            partial()
-            p [] [ encodedText model.Text ]
-        ] |> layout
-
-// ---------------------------------
-// Web app
-// ---------------------------------
-
-let indexHandler (name : string) =
-    let greetings = sprintf "Hello %s, from Giraffe!" name
-    let model     = { Text = greetings }
-    let view      = Views.index model
-    htmlView view
-
+// you can keep all your endpoints in one place :) 
 let webApp =
     choose [
-        GET >=>
-            choose [
-                route "/" >=> indexHandler "world"
-                routef "/hello/%s" indexHandler
-            ]
+        GET  >=> route  "/"                   >=> indexHandler
+        GET  >=> route  "/searchbox-example"  >=> searchBoxExampleHandler
+        POST >=> route  "/search"             >=> searchHandler
         setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
