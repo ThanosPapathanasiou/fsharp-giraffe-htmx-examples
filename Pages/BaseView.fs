@@ -22,6 +22,7 @@ let inline _classes attributes =
 let createPage
     (subtitleText:string)
     (content: XmlNode list) : XmlNode =
+
     let titleText = "Simple Htmx examples using F# and giraffe"
     html [
         _lang "en"

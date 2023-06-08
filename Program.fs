@@ -16,13 +16,19 @@ open Giraffe
 
 open Pages.Index
 open Pages.SearchBoxExample
+open Pages.TabExample
 
 // you can keep all your endpoints in one place :) 
 let webApp =
     choose [
         GET  >=> route  "/"                   >=> indexHandler
+
         GET  >=> route  "/searchbox-example"  >=> searchBoxExampleHandler
         POST >=> route  "/search"             >=> searchHandler
+
+        GET  >=> routef "/tab/%s"                 (fun activeTab -> tabHandler activeTab)
+        GET  >=> routef "/tab/%s/"                (fun activeTab -> tabHandler activeTab)
+
         setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
