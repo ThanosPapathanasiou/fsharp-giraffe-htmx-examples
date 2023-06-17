@@ -76,11 +76,11 @@ let searchResultsView (searchResults : SearchResponse) =
         ]
 
 /// Handles the POST /search request and returns the 'searchResultsView' html results
-let searchHandler (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+let ``POST /search`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     task {
 
 #if DEBUG // add some waiting time to have a chance to see the loading animation
-        for i in [1..10_000_000] do i + 10 |> ignore
+        for i in [1..20_000_000] do i + 10 |> ignore
 #endif
 
         let searchTerm = ctx.Request.Form[nameof(SearchRequest)] |> string
@@ -120,6 +120,6 @@ let searchBoxExampleView =
     createPage subtitle contents
 
 /// Handles the GET /searchbox-example request and returns the 'searchBoxExampleView' html results
-let searchBoxExampleHandler (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+let ``GET /searchbox-example`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     htmlView searchBoxExampleView next ctx
 

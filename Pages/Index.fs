@@ -18,6 +18,19 @@ let indexView =
             div [ _classes [ Bulma.container ] ] [
                 div [ _classes [ Bulma.box ] ] [
                     div [ _classes [ Bulma.content ] ] [
+                        a [ _href "/contact-form" ] [
+                            Text "Contact Form Example"
+                        ]
+                        p [] [
+                            Text "A simple contact form that uses htmx to validate the input when the input loses focus and when the form is submitted."
+                        ]
+                        p [] [
+                            Text "It also disables the fields while they are being validated and uses hyperscript to fix the issue of the blur event firing on the fields when the form is submitting."
+                        ]
+                    ]
+                ]
+                div [ _classes [ Bulma.box ] ] [
+                    div [ _classes [ Bulma.content ] ] [
                         a [ _href "/searchbox-example" ] [
                             Text "Searchbox Example"
                         ]
@@ -46,5 +59,5 @@ let indexView =
 // ---------------------------------
 // "Controllers"
 // ---------------------------------
-let indexHandler (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+let ``GET /`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     htmlView indexView next ctx

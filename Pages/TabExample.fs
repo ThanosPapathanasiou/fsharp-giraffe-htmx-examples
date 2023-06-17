@@ -101,7 +101,7 @@ let etcTabView =
 // Controller
 // ---------------------------------
 
-let tabHandler (activeTab:string) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+let ``GET /tab/:id`` (activeTab:string) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     task {
 
         let selectedTab =

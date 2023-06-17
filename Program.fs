@@ -17,17 +17,24 @@ open Giraffe
 open Pages.Index
 open Pages.SearchBoxExample
 open Pages.TabExample
+open Pages.ContactFormExample
 
 // you can keep all your endpoints in one place :) 
 let webApp =
     choose [
-        GET  >=> route  "/"                   >=> indexHandler
+        GET  >=> route  "/"                        >=> ``GET /``
 
-        GET  >=> route  "/searchbox-example"  >=> searchBoxExampleHandler
-        POST >=> route  "/search"             >=> searchHandler
+        GET  >=> route  "/searchbox-example"       >=> ``GET /searchbox-example``
+        POST >=> route  "/search"                  >=> ``POST /search``
 
-        GET  >=> routef "/tab/%s"                 (fun activeTab -> tabHandler activeTab)
-        GET  >=> routef "/tab/%s/"                (fun activeTab -> tabHandler activeTab)
+        GET  >=> routef "/tab/%s"                 (fun tabId -> ``GET /tab/:id`` tabId)
+        GET  >=> routef "/tab/%s/"                (fun tabId -> ``GET /tab/:id`` tabId)
+
+        GET  >=> route  "/contact-form"            >=> ``GET /contact-form``
+        GET  >=> route  "/contact-form/"           >=> ``GET /contact-form``
+        POST >=> route  "/contact-form"            >=> ``POST /contact-form``
+        POST >=> route  "/contact-form/email"      >=> ``POST /contact-form/email``
+        POST >=> route  "/contact-form/firstname"  >=> ``POST /contact-form/fistname``
 
         setStatusCode 404 >=> text "Not Found" ]
 

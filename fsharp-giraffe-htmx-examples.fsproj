@@ -15,6 +15,7 @@
         <Compile Include="Pages\Htmx.fs" />
         <Compile Include="Pages\BaseView.fs" />
         <Compile Include="Pages\SearchBoxExample.fs" />
+        <Compile Include="Pages\ContactFormExample.fs" />
         <Compile Include="Pages\TabExample.fs" />
         <Compile Include="Pages\Index.fs" />
         <Compile Include="Program.fs" />

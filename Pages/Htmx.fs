@@ -9,10 +9,15 @@ let isHtmxRequest (ctx:HttpContext) : bool =
 
 // there is a giraffe htmx library but you can just add these as needed.
 
-let _hxGet                    = (attr "hx-get")
-let _hxPost                   = (attr "hx-post")
-let _hxTrigger                = (attr "hx-trigger")
-let _hxTarget (id:string)     = (attr "hx-target" ("#"+id))
-let _hxIndicator              = (attr "hx-indicator")
-let _hxSwap                   = (attr "hx-swap")
-let _hxPushUrl                = (attr "hx-push-url")
+let _hxGet                     = (attr "hx-get")
+let _hxPost                    = (attr "hx-post")
+let _hxTrigger                 = (attr "hx-trigger")
+let _hxTarget (id:string)      = (attr "hx-target" ("#"+id))
+let _hxIndicator               = (attr "hx-indicator")
+let _hxIndicatorId (id:string) = (attr "hx-indicator" ("#"+id))
+let _hxSwap                    = (attr "hx-swap")
+let _hxPushUrl                 = (attr "hx-push-url")
+let _hxExt                     = (attr "hx-ext")
+let _hxDisableElement          = (attr "hx-disable-element")
+
+let _hyperScript                = (attr "_")
