@@ -62,7 +62,7 @@ let textFieldComponent formField inputName labelText validationUrl =
                     _hxPost           validationUrl
                     _hxIndicatorId    imageLoadingId
                     _hxTrigger        "blur delay:200ms"
-                    _hyperScript      "on htmx:beforeRequest if myForm.submitting then preventDefault"
+                    _hyperScript      "on htmx:beforeRequest if contactForm.submitting then preventDefault"
                     _hxTarget         groupId
                     _hxExt            "disable-element"
                     _hxDisableElement "self"
