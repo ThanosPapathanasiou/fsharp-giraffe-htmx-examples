@@ -46,17 +46,18 @@ let textFieldComponent formField inputName labelText validationUrl =
     let successIcon = "&#10004;"
     let warningIcon = "&#9888;"
 
-    let groupId = "group" + inputName
-    let imageLoadingId = "loading" + inputName
-    match formField with
-    | Initial -> 
+    let textFieldComponent' classes icon value error =
+        let groupId = "group" + inputName
+        let imageLoadingId = "loading" + inputName
+        
         div [ _id groupId; _classes [ Bulma.field ] ] [
             label [ _class Bulma.label; _for inputName ] [ Text labelText ]
             div   [ _classes [ Bulma.control; Bulma.``has-icons-right`` ] ] [
                 input [
-                    _type        "text"
-                    _class       Bulma.input
-                    _name        inputName
+                    _type             "text"
+                    _classes          classes
+                    _name             inputName
+                    _value            value
 
                     _hxPost           validationUrl
                     _hxIndicatorId    imageLoadingId
@@ -66,61 +67,23 @@ let textFieldComponent formField inputName labelText validationUrl =
                     _hxExt            "disable-element"
                     _hxDisableElement "self"
                 ]
-                span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small``  ] ] [
-                    Text spaceIcon
+                span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small`` ] ] [
+                    Text icon
                     img [ _id imageLoadingId; _src "/img/loading.svg"; _class "htmx-indicator" ]
                 ]
+                match error with
+                | "" -> p [ _classes [Bulma.help; Bulma.``is-danger``] ] [ Text error ] 
+                | _  -> comment ""
             ]
         ]
-    | Invalid (value, error) ->
-        div [ _id groupId; _classes [ Bulma.field ] ] [
-            label [ _class Bulma.label; _for inputName ] [ Text labelText ]
-            div   [ _classes [ Bulma.control; Bulma.``has-icons-right``] ] [
-                input [
-                    _type  "text"
-                    _classes [ Bulma.input; Bulma.``is-danger`` ]
-                    _name  inputName
-                    _value value
-
-                    _hxPost           ("/contact-form/" + inputName.ToLowerInvariant() )
-                    _hxIndicatorId    imageLoadingId
-                    _hxTrigger        "blur delay:200ms"
-                    _hyperScript      "on htmx:beforeRequest if myForm.submitting then preventDefault"
-                    _hxTarget         groupId
-                    _hxExt            "disable-element"
-                    _hxDisableElement "self"
-                ]
-                span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small``  ] ] [
-                    Text warningIcon
-                    img [ _id imageLoadingId; _src "/img/loading.svg"; _class "htmx-indicator" ]
-                ]
-            ]
-            p [ _classes [Bulma.help; Bulma.``is-danger``] ] [ Text error ]
-        ]
-    | Valid value ->
-        div [ _id groupId; _classes [ Bulma.field ] ] [
-            label [ _class Bulma.label; _for inputName ] [ Text labelText ]
-            div   [ _classes [ Bulma.control; Bulma.``has-icons-right``] ] [
-                input [
-                    _type  "text"
-                    _classes [ Bulma.input; Bulma.``is-success`` ]
-                    _name  inputName
-                    _value value
-
-                    _hxPost           ("/contact-form/" + inputName.ToLowerInvariant() )
-                    _hxIndicatorId    imageLoadingId
-                    _hxTrigger        "blur delay:200ms"
-                    _hyperScript      "on htmx:beforeRequest if myForm.submitting then preventDefault"
-                    _hxTarget         groupId
-                    _hxExt            "disable-element"
-                    _hxDisableElement "self"
-                ]
-                span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small``  ] ] [
-                    Text successIcon
-                    img [ _id imageLoadingId; _src "/img/loading.svg"; _class "htmx-indicator" ]
-                ]
-            ]
-        ]
+    
+    match formField with
+    | Initial                   ->
+        textFieldComponent' [Bulma.input] spaceIcon "" ""
+    | Invalid (value, error)    ->
+        textFieldComponent' [Bulma.input; Bulma.``is-danger``] warningIcon value error
+    | Valid value               ->
+        textFieldComponent' [Bulma.input; Bulma.``is-success``] successIcon value ""
 
 let contactFormComponent (contactInformation : ContactInformation) =
 
