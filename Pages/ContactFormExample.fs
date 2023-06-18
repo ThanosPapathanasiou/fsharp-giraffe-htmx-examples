@@ -46,7 +46,7 @@ let textFieldComponent formField inputName labelText validationUrl =
     let successIcon = "&#10004;"
     let warningIcon = "&#9888;"
 
-    let textFieldComponent' classes icon value error =
+    let textFieldComponent' classes icon (value: string option) (error : string option) =
         let groupId = "group" + inputName
         let imageLoadingId = "loading" + inputName
         
@@ -57,7 +57,9 @@ let textFieldComponent formField inputName labelText validationUrl =
                     _type             "text"
                     _classes          classes
                     _name             inputName
-                    _value            value
+                    match value with
+                    | Some v -> _value v
+                    | None   -> _value ""
 
                     _hxPost           validationUrl
                     _hxIndicatorId    imageLoadingId
@@ -72,18 +74,18 @@ let textFieldComponent formField inputName labelText validationUrl =
                     img [ _id imageLoadingId; _src "/img/loading.svg"; _class "htmx-indicator" ]
                 ]
                 match error with
-                | "" -> p [ _classes [Bulma.help; Bulma.``is-danger``] ] [ Text error ] 
-                | _  -> comment ""
+                | Some err -> p [ _classes [Bulma.help; Bulma.``is-danger``] ] [ Text err ] 
+                | None     -> comment ""
             ]
         ]
     
     match formField with
     | Initial                   ->
-        textFieldComponent' [Bulma.input] spaceIcon "" ""
+        textFieldComponent' [Bulma.input] spaceIcon None None
     | Invalid (value, error)    ->
-        textFieldComponent' [Bulma.input; Bulma.``is-danger``] warningIcon value error
+        textFieldComponent' [Bulma.input; Bulma.``is-danger``] warningIcon (Some value)  (Some error)
     | Valid value               ->
-        textFieldComponent' [Bulma.input; Bulma.``is-success``] successIcon value ""
+        textFieldComponent' [Bulma.input; Bulma.``is-success``] successIcon (Some value) None
 
 let contactFormComponent (contactInformation : ContactInformation) =
 
