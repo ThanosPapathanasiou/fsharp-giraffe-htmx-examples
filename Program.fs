@@ -5,6 +5,7 @@ open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
@@ -15,6 +16,7 @@ open Giraffe
 // ---------------------------------
 
 open Pages.Index
+open Pages.Docs
 open Pages.SearchBoxExample
 open Pages.TabExample
 open Pages.ContactFormExample
@@ -23,6 +25,8 @@ open Pages.ContactFormExample
 let webApp =
     choose [
         GET  >=> route  "/"                        >=> ``GET /``
+
+        GET  >=> routef  "/docs/%s"               (fun document -> ``GET /docs/:document`` document)
 
         GET  >=> route  "/searchbox-example"       >=> ``GET /searchbox-example``
         POST >=> route  "/search"                  >=> ``POST /search``

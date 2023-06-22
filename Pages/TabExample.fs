@@ -101,32 +101,32 @@ let etcTabView =
 // Controller
 // ---------------------------------
 
-let ``GET /tab/:id`` (activeTab:string) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
-    task {
+let ``GET /tab/:id`` (activeTab:string) : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        task {
+            let selectedTab =
+                match tabFromUrlString activeTab with
+                | Some t -> t
+                | None -> ``First Tab`` //the default tab
 
-        let selectedTab =
-            match tabFromUrlString activeTab with
-            | Some t -> t
-            | None -> ``First Tab`` //the default tab
+            // TODO: get the data from an api and return it here. Then have views display it.
+            let getViewForTab (tab:Tab) =
+                match tab with
+                | ``First Tab``  -> firstTabView
+                | ``Second Tab`` -> secondTabView
+                | ``Etc Tab``    -> etcTabView
 
-        // TODO: get the data from an api and return it here. Then have views display it.
-        let getViewForTab (tab:Tab) =
-            match tab with
-            | ``First Tab``  -> firstTabView
-            | ``Second Tab`` -> secondTabView
-            | ``Etc Tab``    -> etcTabView
+            let baseUrl = "/tab"
+            let subtitle = "Select from multiple tabs"
+            let tabContent = getViewForTab selectedTab
 
-        let baseUrl = "/tab"
-        let subtitle = "Select from multiple tabs"
-        let tabContent = getViewForTab selectedTab
+            let htmlResponse (tab: Tab) = 
+                if isHtmxRequest ctx then
+                    tabComponent baseUrl selectedTab tabContent
+                else 
+                    tabView subtitle baseUrl selectedTab tabContent
 
-        let htmlResponse (tab: Tab) = 
-            if isHtmxRequest ctx then
-                tabComponent baseUrl selectedTab tabContent
-            else 
-                tabView subtitle baseUrl selectedTab tabContent
-
-        let view = selectedTab |> htmlResponse |> htmlView
-        return! view next ctx
-    }
+            let view = selectedTab |> htmlResponse |> htmlView
+            return! view next ctx
+        }
 

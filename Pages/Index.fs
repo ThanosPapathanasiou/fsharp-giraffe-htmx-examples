@@ -49,15 +49,24 @@ let indexView =
                         ]
                     ]
                 ]
-
+                div [ _classes [ Bulma.box ] ] [
+                    div [ _classes [ Bulma.content ] ] [
+                        a [ _href "/docs/introduction" ] [
+                            Text "Extremely barebones docs"
+                        ]
+                        p [] [
+                            Text "I haven't even styled them yet. Proceed with caution if you have a dark theme."
+                        ]
+                    ]
+                ]
             ]
         ]
     ]
     createPage subtitle contents
 
-
 // ---------------------------------
 // "Controllers"
 // ---------------------------------
-let ``GET /`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
-    htmlView indexView next ctx
+let ``GET /`` : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        htmlView indexView next ctx

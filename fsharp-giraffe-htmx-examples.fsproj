@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FSharp.Formatting" Version="18.1.0" />
         <PackageReference Include="Giraffe" Version="6.0.0" />
         <PackageReference Include="Zanaptak.TypedCssClasses" Version="1.0.0" />
     </ItemGroup>
@@ -18,6 +19,7 @@
         <Compile Include="Pages\ContactFormExample.fs" />
         <Compile Include="Pages\TabExample.fs" />
         <Compile Include="Pages\Index.fs" />
+        <Compile Include="Pages\Docs.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

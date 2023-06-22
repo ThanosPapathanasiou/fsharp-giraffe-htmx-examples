@@ -76,32 +76,33 @@ let searchResultsView (searchResults : SearchResponse) =
         ]
 
 /// Handles the POST /search request and returns the 'searchResultsView' html results
-let ``POST /search`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
-    task {
+let ``POST /search`` : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        task {
 
-#if DEBUG // add some waiting time to have a chance to see the loading animation
-        for i in [1..20_000_000] do i + 10 |> ignore
-#endif
+    #if DEBUG // add some waiting time to have a chance to see the loading animation
+            for i in [1..20_000_000] do i + 10 |> ignore
+    #endif
 
-        let searchTerm = ctx.Request.Form[nameof(SearchRequest)] |> string
+            let searchTerm = ctx.Request.Form[nameof(SearchRequest)] |> string
 
-        // TODO: get the response from a database / service / etc
-        //       you can do that by using the ctx to inject what you need.
-        // 
-        //       let myService = ctx.GetService<IMyService>()
-        let searchResults =
-            match searchTerm with
-            | "" -> []
-            | _  -> [
-                        "First search result."
-                        "Second search result."
-                        "Third search result."
-                        "You get the idea..."
-                    ]
+            // TODO: get the response from a database / service / etc
+            //       you can do that by using the ctx to inject what you need.
+            // 
+            //       let myService = ctx.GetService<IMyService>()
+            let searchResults =
+                match searchTerm with
+                | "" -> []
+                | _  -> [
+                            "First search result."
+                            "Second search result."
+                            "Third search result."
+                            "You get the idea..."
+                        ]
 
-        let view = htmlView (searchResultsView searchResults)
-        return! view next ctx
-    }
+            let view = htmlView (searchResultsView searchResults)
+            return! view next ctx
+        }
 
 // ---------------------------------
 // GET /searchbox-example View and Handler
@@ -120,6 +121,7 @@ let searchBoxExampleView =
     createPage subtitle contents
 
 /// Handles the GET /searchbox-example request and returns the 'searchBoxExampleView' html results
-let ``GET /searchbox-example`` (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
-    htmlView searchBoxExampleView next ctx
+let ``GET /searchbox-example`` : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) -> 
+        htmlView searchBoxExampleView next ctx
 
