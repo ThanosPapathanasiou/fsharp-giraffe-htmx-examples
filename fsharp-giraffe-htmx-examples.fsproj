@@ -10,6 +10,7 @@
         <PackageReference Include="FSharp.Formatting" Version="18.1.0" />
         <PackageReference Include="Giraffe" Version="6.0.0" />
         <PackageReference Include="Zanaptak.TypedCssClasses" Version="1.0.0" />
+        <PackageReference Update="FSharp.Core" Version="7.0.300" />
     </ItemGroup>
 
     <ItemGroup>
