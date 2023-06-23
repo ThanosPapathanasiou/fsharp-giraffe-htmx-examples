@@ -12,7 +12,8 @@ let isHtmxRequest (ctx:HttpContext) : bool =
 let _hxGet                     = (attr "hx-get")
 let _hxPost                    = (attr "hx-post")
 let _hxTrigger                 = (attr "hx-trigger")
-let _hxTarget (id:string)      = (attr "hx-target" ("#"+id))
+let _hxTargetId (id:string)    = (attr "hx-target" ("#"+id))
+let _hxTarget                  = (attr "hx-target" )
 let _hxIndicator               = (attr "hx-indicator")
 let _hxIndicatorId (id:string) = (attr "hx-indicator" ("#"+id))
 let _hxSwap                    = (attr "hx-swap")
@@ -20,4 +21,5 @@ let _hxPushUrl                 = (attr "hx-push-url")
 let _hxExt                     = (attr "hx-ext")
 let _hxDisableElement          = (attr "hx-disable-element")
 
-let _hyperScript                = (attr "_")
+let _hyperScript               = (attr "_")
+let _hyperScripts scripts      = scripts |> String.concat " " |> attr "_"

@@ -1,5 +1,7 @@
 ﻿module Pages.ContactFormExample
 
+open System
+open System.Collections.Generic
 open Giraffe
 open Giraffe.ViewEngine
 
@@ -14,13 +16,22 @@ open Pages.Htmx
 type Value        = string
 type ErrorMessage = string
 type FormField    = Initial | Invalid of (Value * ErrorMessage) | Valid of Value
-type Email        = FormField
-type FirstName    = FormField
 
+type Email     = FormField
+type FirstName = FormField
+type LastName  = FormField
 type ContactInformation = {
     Email     : Email
     FirstName : FirstName
+    LastName  : LastName
 }
+
+// TODO: get the name and label from data annotations attributes?
+let data : IDictionary<string, (string * string * string ) > = dict [
+    nameof(Unchecked.defaultof<ContactInformation>.Email),     (nameof(Unchecked.defaultof<ContactInformation>.Email), "Email", "/contact-form/email")
+    nameof(Unchecked.defaultof<ContactInformation>.FirstName), (nameof(Unchecked.defaultof<ContactInformation>.FirstName), "First Name", "/contact-form/firstname")
+    nameof(Unchecked.defaultof<ContactInformation>.LastName),  (nameof(Unchecked.defaultof<ContactInformation>.LastName), "Last Name", "/contact-form/lastname")
+]
 
 // ---------------------------------
 // Validations
@@ -28,61 +39,58 @@ type ContactInformation = {
 
 let validateEmail (rawEmail: string) : Email =
     match rawEmail with
-    | s when System.String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
+    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
     | s when s.Contains("@") && s.Contains(".") -> Valid s
     | s  -> Invalid (s, "Invalid Email Address") 
 
 let validateFirstName (rawFirstName: string) : FirstName =
     match rawFirstName with
-    | s when System.String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
+    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
+    | s -> Valid s
+
+let validateLastName (rawFirstName: string) : LastName =
+    match rawFirstName with
+    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
     | s -> Valid s
 
 // ---------------------------------
 // "Components" and Views
 // ---------------------------------
 
-let textFieldComponent formField inputName labelText validationUrl =
+let textFieldComponent formFieldValue formFieldName formFieldLabel validationUrl =
     let emptySpaceIcon = "&#160;"
     let successIcon    = "&#10004;"
     let warningIcon    = "&#9888;"
 
-    let textFieldComponent' inputCssClasses icon (value: string option) (error : string option) =
-        let groupId = "group" + inputName
-        let imageLoadingId = "loading" + inputName
-        
-        div [ _id groupId; _classes [ Bulma.field ] ] [
-            label [ _class Bulma.label; _for inputName ] [ Text labelText ]
-            div   [ _classes [ Bulma.control; Bulma.``has-icons-right`` ] ] [
-                input [
-                    _type             "text"
-                    _classes          inputCssClasses
-                    _name             inputName
-                    match value with
-                    | Some v -> _value v
-                    | None   -> _value ""
+    let cssClasses, value, message, icon =
+        match formFieldValue with
+        | Initial                -> [""]                  , ""   , emptySpaceIcon, emptySpaceIcon
+        | Invalid (value, error) -> [Bulma.``is-danger`` ], value, error         , warningIcon
+        | Valid    value         -> [Bulma.``is-success``], value, emptySpaceIcon, successIcon
 
-                    _hxPost           validationUrl
-                    _hxIndicatorId    imageLoadingId
-                    _hxTrigger        "blur delay:200ms"
-                    _hyperScript      "on htmx:beforeRequest if (closest <form/>).submitting then halt"
-                    _hxTarget         groupId
-                    _hxExt            "disable-element"
-                    _hxDisableElement "self"
-                ]
-                span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small`` ] ] [
-                    Text icon
-                    img [ _id imageLoadingId; _src "/img/loading.svg"; _class "htmx-indicator" ]
-                ]
-                match error with
-                | Some err -> p [ _classes [Bulma.help; Bulma.``is-danger``] ] [ Text err ] 
-                | None     -> comment ""
+    div [ _classes [ Bulma.field ] ] [
+        label [ _class Bulma.label; _for formFieldName ] [ Text formFieldLabel ]
+        div   [ _classes [ Bulma.control; Bulma.``has-icons-right`` ] ] [
+            input [
+                _type             "text"
+                _classes          ([ Bulma.input ] @ cssClasses)
+                _name             formFieldName
+                _value            value
+
+                _hxPost           validationUrl
+                _hxTrigger        "blur delay:200ms"
+                _hyperScripts     ["on htmx:beforeRequest if (closest <form/>).submitting then halt end";
+                                   "then on htmx:beforeRequest add .is-loading to (closest <div/>)"
+                                   "then on htmx:beforeRequest add @disabled to me";
+                                   "then on htmx:beforeRequest remove (next <span/>) end"]
+                _hxTarget          ("closest ." + Bulma.field)
             ]
+            span [ _classes [ Bulma.icon; Bulma.``is-right``; Bulma.``is-small`` ] ] [
+                Text icon
+            ]
+            p [ _classes ([Bulma.help] @ cssClasses) ] [ Text message ]
         ]
-    
-    match formField with
-    | Initial                -> textFieldComponent' [Bulma.input]                       emptySpaceIcon  None         None
-    | Invalid (value, error) -> textFieldComponent' [Bulma.input; Bulma.``is-danger``]  warningIcon     (Some value) (Some error)
-    | Valid    value         -> textFieldComponent' [Bulma.input; Bulma.``is-success``] successIcon     (Some value) None
+    ]
 
 let contactFormComponent (contactInformation : ContactInformation) =
 
@@ -90,34 +98,26 @@ let contactFormComponent (contactInformation : ContactInformation) =
         _name        (nameof ContactInformation)
         _hxPost      "/contact-form"
         _hxSwap      "outerHTML"
-        _hxIndicator ".htmx-indicator"
         _hyperScript "on submit set me.submitting to true wait for htmx:afterOnLoad from me set me.submitting to false"
     ] [
-        let email = (nameof Unchecked.defaultof<ContactInformation>.Email)
-        textFieldComponent
-            contactInformation.Email
-            email
-            "Email"
-            ("/contact-form/" + email.ToLowerInvariant())
 
-        let firstName = (nameof Unchecked.defaultof<ContactInformation>.FirstName)
-        textFieldComponent
-            contactInformation.FirstName
-            firstName
-            "First Name"
-            ("/contact-form/" + firstName.ToLowerInvariant())
+        let formFieldValue   = contactInformation.Email
+        let name, label, url = data[nameof(contactInformation.Email)]
+        textFieldComponent formFieldValue name label url
+        
+        let formFieldValue   = contactInformation.FirstName
+        let name, label, url = data[nameof(contactInformation.FirstName)]
+        textFieldComponent formFieldValue name label url
 
-        progress  [
-            _classes [ "htmx-indicator"; Bulma.progress
-                       BulmaStyle; Bulma.``is-small``; Bulma.``is-marginless`` ]
-        ] [ ]
-
-        br []
+        let formFieldValue   = contactInformation.LastName
+        let name, label, url = data[nameof(contactInformation.LastName)]
+        textFieldComponent formFieldValue name label url
 
         div [ _classes [ Bulma.field; Bulma.``is-grouped`` ] ] [
             button [
                 _classes [ Bulma.button; Bulma.``is-link`` ]
                 _type "submit"
+                _hyperScript "on click add .is-loading to me"
             ] [ Text "Submit" ]
         ]
     ]
@@ -129,7 +129,7 @@ let contactFormView =
             div [ _classes [ Bulma.container ] ] [
                 div [ _classes [ Bulma.``is-full-desktop`` ] ] [
                     h3 [ _classes [Bulma.subtitle ; Bulma.``is-3``] ] [ Text "Signup Form" ]
-                    contactFormComponent { Email = Initial; FirstName = Initial }
+                    contactFormComponent { Email = Initial; FirstName = Initial; LastName = Initial }
                 ]
             ]
         ]
@@ -148,40 +148,42 @@ let ``GET /contact-form`` : HttpHandler =
 let ``POST /contact-form`` : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
+            let emailValue =
+                nameof(Unchecked.defaultof<ContactInformation>.Email)
+                |> fun s -> ctx.Request.Form[s]
+                |> string
+                |> validateEmail
 
-    #if DEBUG // add some waiting time to have a chance to see the loading animation
-            for i in [1..20_000_000] do i + 10 |> ignore
-    #endif
+            let firstNameValue =
+                nameof(Unchecked.defaultof<ContactInformation>.FirstName)
+                |> fun s -> ctx.Request.Form[s]
+                |> string
+                |> validateFirstName
 
-            let rawEmail = (string)ctx.Request.Form[nameof(Unchecked.defaultof<ContactInformation>.Email)]
-            let emailValue = validateEmail rawEmail
-
-            let rawFirstName = (string)ctx.Request.Form[nameof(Unchecked.defaultof<ContactInformation>.FirstName)]
-            let firstNameValue = validateFirstName rawFirstName
+            let lastNameValue =
+                nameof(Unchecked.defaultof<ContactInformation>.LastName)
+                |> fun s -> ctx.Request.Form[s]
+                |> string
+                |> validateFirstName
 
             let contactInformation = {
                 Email     = emailValue
                 FirstName = firstNameValue
+                LastName  = lastNameValue 
             }
 
-            let view = htmlView (contactFormComponent contactInformation)
+            let html = contactFormComponent contactInformation
+            let view = htmlView html
             return! view next ctx
         }
 
 let ``POST /contact-form/email`` : HttpHandler =
-    fun (next: HttpFunc) (ctx: HttpContext) -> 
+    fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-
-    #if DEBUG // add some waiting time to have a chance to see the loading animation
-            for i in [1..20_000_000] do i + 10 |> ignore
-    #endif
-
-            let email         = nameof(Unchecked.defaultof<ContactInformation>.Email)
-            let rawValue      = (string)ctx.Request.Form[email]
-            let value         = validateEmail rawValue
-            let validationUrl = "/contact-form/" + email.ToLowerInvariant()
-            let html          = textFieldComponent value email "Email" validationUrl
-            let view          = htmlView html
+            let name, label, url = data[nameof(Unchecked.defaultof<ContactInformation>.Email)]
+            let formFieldValue   = name |> fun s -> ctx.Request.Form[s] |> string |> validateEmail
+            let html             = textFieldComponent formFieldValue name label url
+            let view             = htmlView html
 
             return! view next ctx
         }
@@ -189,17 +191,21 @@ let ``POST /contact-form/email`` : HttpHandler =
 let ``POST /contact-form/fistname`` : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
+            let name, label, url = data[nameof(Unchecked.defaultof<ContactInformation>.FirstName)]
+            let formFieldValue   = name |> fun s -> ctx.Request.Form[s] |> string |> validateFirstName
+            let html             = textFieldComponent formFieldValue name label url
+            let view             = htmlView html
 
-    #if DEBUG // add some waiting time to have a chance to see the loading animation
-            for i in [1..20_000_000] do i + 10 |> ignore
-    #endif
+            return! view next ctx
+        }
 
-            let firstName     = nameof(Unchecked.defaultof<ContactInformation>.FirstName)
-            let rawValue      = (string)ctx.Request.Form[firstName]
-            let value         = validateFirstName rawValue
-            let validationUrl = "/contact-form/" + firstName.ToLowerInvariant()
-            let html          = textFieldComponent value firstName "First Name" validationUrl 
-            let view          = htmlView html
+let ``POST /contact-form/lastname`` : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        task {
+            let name, label, url = data[nameof(Unchecked.defaultof<ContactInformation>.LastName)]
+            let formFieldValue   = name |> fun s -> ctx.Request.Form[s] |> string |> validateLastName
+            let html             = textFieldComponent formFieldValue name label url
+            let view             = htmlView html
 
             return! view next ctx
         }

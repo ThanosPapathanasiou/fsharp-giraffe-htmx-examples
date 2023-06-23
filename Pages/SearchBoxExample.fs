@@ -37,7 +37,7 @@ let simpleSearchBox =
             // trigger the post request when user stops typing and place results in the target
             _hxTrigger      "keyup changed delay:500ms"
             _hxPost         "/search"
-            _hxTarget       searchResults
+            _hxTargetId       searchResults
 
             // show progress bar while waiting for response
             _hxIndicator    ".htmx-indicator"

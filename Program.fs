@@ -39,6 +39,7 @@ let webApp =
         POST >=> route  "/contact-form"            >=> ``POST /contact-form``
         POST >=> route  "/contact-form/email"      >=> ``POST /contact-form/email``
         POST >=> route  "/contact-form/firstname"  >=> ``POST /contact-form/fistname``
+        POST >=> route  "/contact-form/lastname"   >=> ``POST /contact-form/lastname``
 
         setStatusCode 404 >=> text "Not Found" ]
 

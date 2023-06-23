@@ -46,7 +46,7 @@ let tabComponent (baseUrl:string) (activeTab:Tab) (tabContent:XmlNode) =
                 // do a htmx get and replace the target with the response
                 _hxGet $"{baseUrl}/{tabToUrlString thisTab}"
                 _hxPushUrl "true"
-                _hxTarget tabComponentId
+                _hxTargetId tabComponentId
                 _hxSwap "outerHTML"
             ] [
                 span [] [ Text ( string thisTab ) ]

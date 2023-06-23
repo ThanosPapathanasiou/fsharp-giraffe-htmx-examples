@@ -40,9 +40,6 @@ let createPage
                     _integrity "sha384-aOxz9UdWG0yBiyrTwPeMibmaoq07/d3a96GCbb9x60f3mOt5zwkjdbcHFnKH8qls"
                     _crossorigin "anonymous" ] []
             script [
-                    _src "https://unpkg.com/htmx.org/dist/ext/disable-element.js"
-            ] []
-            script [
                 _src "https://unpkg.com/hyperscript.org@0.9.8"
             ] []
         ]
